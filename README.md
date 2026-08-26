@@ -21,10 +21,10 @@ Existing:
 - `MANAGER_SESSION_TOKEN`
 
 Add for this version:
-- `SITE_ACCESS_PIN` - shared PIN required to open the app
-- `SITE_ACCESS_SESSION_TOKEN` - random secret at least 32 characters
+- `SITE_PIN` - shared PIN required to open the app
+- `MANAGER_SESSION_TOKEN` - random secret at least 32 characters
 - `QUALITY_CONTROL_PIN` - PIN for the Quality Control user
-- `QUALITY_CONTROL_SESSION_TOKEN` - separate random secret at least 32 characters
+- `MANAGER_SESSION_TOKEN` - separate random secret at least 32 characters
 
 ## Existing Supabase database update
 Add these nullable columns to the existing `issues` table:
