@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/supabase';
+import { hasSiteAccess } from '@/lib/manager';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await hasSiteAccess())) return NextResponse.json({ error: 'Site login required' }, { status: 401 });
   const { id } = await params;
   const form = await req.formData();
   const file = form.get('file');

@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/supabase';
-import { isManager } from '@/lib/manager';
+import { hasAdminAccess, hasSiteAccess } from '@/lib/manager';
 
 export async function GET() {
+  if (!(await hasSiteAccess())) return NextResponse.json({ error: 'Site login required' }, { status: 401 });
   const db = adminDb();
   const { data, error } = await db.from('report_issue_staff').select('*').order('name');
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ staff: data });
 }
 export async function POST(req: Request) {
-  if (!(await isManager())) return NextResponse.json({ error: 'Manager login required' }, { status: 401 });
+  if (!(await hasAdminAccess())) return NextResponse.json({ error: 'Manager login required' }, { status: 401 });
   const { name } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
   const db = adminDb();

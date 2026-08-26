@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/supabase';
-import { isManager } from '@/lib/manager';
+import { hasAdminAccess } from '@/lib/manager';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isManager())) return NextResponse.json({ error: 'Manager login required' }, { status: 401 });
+  if (!(await hasAdminAccess())) return NextResponse.json({ error: 'Manager login required' }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
   const allowed = ['priority','responsible_person','due_date','status','completion_date','manager_comments','corrective_action'];

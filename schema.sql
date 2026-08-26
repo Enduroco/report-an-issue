@@ -24,7 +24,9 @@ create table if not exists issues (
   completion_date date,
   manager_comments text,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  deleted_reason text
 );
 
 create table if not exists issue_history (
