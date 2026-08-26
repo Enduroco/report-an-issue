@@ -15,7 +15,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
   const { data: signed, error: signError } = await db.storage.from('issue-photos').createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
   if (signError) return NextResponse.json({ error: signError.message }, { status: 500 });
-  const { error: updateError } = await db.from('issue_reports').update({ photo_path: path, photo_url: signed.signedUrl }).eq('id', id);
+  const { error: updateError } = await db.from('issues').update({ photo_path: path, updated_at: new Date().toISOString() }).eq('id', id);
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 });
   return NextResponse.json({ ok: true, photo_url: signed.signedUrl });
 }

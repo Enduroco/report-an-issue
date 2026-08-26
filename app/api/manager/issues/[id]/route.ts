@@ -10,8 +10,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const update: Record<string, unknown> = {};
   for (const k of allowed) if (k in body) update[k] = body[k] || null;
   if (body.status === 'Closed' && !body.completion_date) update.completion_date = new Date().toISOString().slice(0,10);
+  update.updated_at = new Date().toISOString();
   const db = adminDb();
-  const { error } = await db.from('issue_reports').update(update).eq('id', id);
+  const { error } = await db.from('issues').update(update).eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
