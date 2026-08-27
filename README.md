@@ -1,37 +1,32 @@
-# EnduroCo Report an Issue
+# EnduroCo Vehicle Time Tracker - Victoria / Pause / Reset update
 
-Private tablet/phone-friendly issue reporting app for EnduroCo.
+This version adds:
+- All displayed and exported times in `Australia/Melbourne` (Victoria), including daylight saving.
+- PAUSE / RESUME for active jobs. Paused time is excluded from labour hours.
+- Larger tablet-friendly controls and yellow/black workshop styling.
+- Manager-only RESET ALL STAFF PINS.
+- Manager-only CLEAR ALL TIME RECORDS.
+- Manager-only CLEAR TIME + VEHICLES.
+- Existing staff, vehicles, due dates, actual finish dates, reporting, CSV export and correction audit history.
 
-## Features
-- Private site access PIN before the app opens
-- Report issues from tablets/phones
-- Take a photo directly with the rear camera or select an existing image
-- Separate Manager and Quality Control PIN access
-- Fixed Responsible Person list: Jason, Josh, Jhon, John R, Danny, Lee-Anne
-- Open, Overdue, Closed and All issue filters
-- Due dates, corrective actions, completion dates and manager comments
-- Quality Control can remove unnecessary reports using a soft-delete audit record
-- EnduroCo yellow/black theme
+## Required Supabase migration
+Add these columns to `time_entries` before deploying:
+- `paused_at` - `timestamptz`, nullable
+- `total_paused_seconds` - `int4` / integer, not null, default `0`
 
-## Vercel environment variables
-Existing:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `MANAGER_PIN`
-- `MANAGER_SESSION_TOKEN`
+Or run `pause_migration.sql`.
 
-Add for this version:
-- `SITE_PIN` - shared PIN required to open the app
-- `MANAGER_SESSION_TOKEN` - random secret at least 32 characters
-- `QUALITY_CONTROL_PIN` - PIN for the Quality Control user
-- `MANAGER_SESSION_TOKEN` - separate random secret at least 32 characters
+## Reset controls
+After deployment:
+- Manager Staff -> RESET ALL STAFF PINS. This keeps staff names but clears every staff PIN. Assign a new PIN to each staff member using Edit / Reset PIN.
+- Manager Dashboard -> System maintenance -> CLEAR ALL TIME RECORDS to remove time data but keep staff and vehicles.
+- Manager Dashboard -> System maintenance -> CLEAR TIME + VEHICLES to remove time data and vehicle records but keep staff.
 
-## Existing Supabase database update
-Add these nullable columns to the existing `issues` table:
-- `deleted_at` type `timestamptz`
-- `deleted_reason` type `text`
+Each destructive reset requires a browser confirmation and typing `RESET`.
 
-The app hides rows where `deleted_at` is populated. This allows Quality Control to remove an unnecessary report from normal use without destroying the audit trace.
-
-## Storage
-Private Supabase Storage bucket: `issue-photos`
+## Environment variables
+No new Vercel environment variables are required. Keep the existing:
+- SUPABASE_URL
+- SUPABASE_SERVICE_ROLE_KEY
+- MANAGER_PIN
+- MANAGER_SESSION_TOKEN

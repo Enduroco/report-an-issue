@@ -1,20 +1,25 @@
-import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/supabase';
-import { hasAdminAccess, hasSiteAccess } from '@/lib/manager';
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '../../../../lib/supabase';
+import { isManager } from '../../../../lib/manager';
+import { hashPin, validPin } from '../../../../lib/pin';
 
-export async function GET() {
-  if (!(await hasSiteAccess())) return NextResponse.json({ error: 'Site login required' }, { status: 401 });
-  const db = adminDb();
-  const { data, error } = await db.from('report_issue_staff').select('*').order('name');
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ staff: data });
-}
-export async function POST(req: Request) {
-  if (!(await hasAdminAccess())) return NextResponse.json({ error: 'Manager login required' }, { status: 401 });
-  const { name } = await req.json();
-  if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-  const db = adminDb();
-  const { error } = await db.from('report_issue_staff').insert({ name: name.trim(), active: true });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+export async function POST(req:NextRequest){
+  if(!(await isManager())) return NextResponse.json({error:'Manager access required.'},{status:401});
+  try{
+    const body=await req.json();
+    const name=String(body.name||'').trim();
+    const pin=String(body.pin||'');
+    const active=body.active!==false;
+    if(!name) return NextResponse.json({error:'Employee name is required.'},{status:400});
+    if(!body.id && !validPin(pin)) return NextResponse.json({error:'A new employee needs a 4-digit PIN.'},{status:400});
+    if(pin && !validPin(pin)) return NextResponse.json({error:'PIN must be exactly 4 digits.'},{status:400});
+
+    const db=supabaseAdmin();
+    const record:any={name,active};
+    if(pin) record.pin_hash=hashPin(pin);
+    const q=body.id?db.from('staff').update(record).eq('id',body.id):db.from('staff').insert(record);
+    const {error}=await q;
+    if(error) throw error;
+    return NextResponse.json({ok:true});
+  }catch(e:any){return NextResponse.json({error:e.message},{status:500})}
 }

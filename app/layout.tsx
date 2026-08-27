@@ -1,3 +1,6 @@
 import './globals.css';
-export const metadata = { title: 'EnduroCo Report an Issue', description: 'Workshop issue reporting and management' };
-export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}</body></html>; }
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'EnduroCo Vehicle Time Tracker' };
+export default function RootLayout({children}:{children:React.ReactNode}){
+  return <html lang="en"><body>{children}</body></html>;
+}

@@ -1,14 +1,10 @@
-import { NextResponse } from 'next/server';
-import { setManagerSession, setQualityControlSession } from '@/lib/manager';
-export async function POST(req: Request) {
-  const { pin } = await req.json();
-  if (process.env.MANAGER_PIN && String(pin) === String(process.env.MANAGER_PIN)) {
-    await setManagerSession();
-    return NextResponse.json({ ok: true, role: 'manager' });
-  }
-  if (process.env.QUALITY_CONTROL_PIN && String(pin) === String(process.env.QUALITY_CONTROL_PIN)) {
-    await setQualityControlSession();
-    return NextResponse.json({ ok: true, role: 'quality_control' });
-  }
-  return NextResponse.json({ error: 'Incorrect manager or Quality Control PIN' }, { status: 401 });
+import { NextRequest, NextResponse } from 'next/server';
+export async function POST(req:NextRequest){
+  const {pin}=await req.json();
+  if(!process.env.MANAGER_PIN||pin!==process.env.MANAGER_PIN) return NextResponse.json({error:'Incorrect manager PIN.'},{status:401});
+  const token=process.env.MANAGER_SESSION_TOKEN;
+  if(!token) return NextResponse.json({error:'Manager session token is not configured.'},{status:500});
+  const res=NextResponse.json({ok:true});
+  res.cookies.set('manager_session',token,{httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax',path:'/',maxAge:60*60*12});
+  return res;
 }
